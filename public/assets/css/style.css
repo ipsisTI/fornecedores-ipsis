@@ -795,12 +795,20 @@ body {
     font-size: 16px;
 }
 
-.pdf-info {
-    text-align: center;
+.pdf-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 15px;
-    padding: 10px;
+    padding: 12px;
     background: #e3f2fd;
     border-radius: 5px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.pdf-info {
+    flex: 1;
 }
 
 .page-info {
@@ -809,14 +817,67 @@ body {
     font-size: 14px;
 }
 
+.pdf-zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.zoom-btn {
+    background: #0066cc;
+    color: white;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s;
+}
+
+.zoom-btn:hover {
+    background: #0052a3;
+}
+
+.zoom-btn:active {
+    transform: scale(0.95);
+}
+
+.zoom-btn-reset {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s;
+}
+
+.zoom-btn-reset:hover {
+    background: #5a6268;
+}
+
+#zoomLevel {
+    font-weight: 600;
+    color: #333;
+    min-width: 50px;
+    text-align: center;
+    font-size: 14px;
+}
+
 .pdf-scroll-container {
     background: white;
     border-radius: 5px;
     padding: 20px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    max-height: 600px;
+    max-height: 800px;
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: auto;
 }
 
 #pdfPagesContainer {
@@ -824,6 +885,7 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 20px;
+    transition: transform 0.2s ease;
 }
 
 #pdfPagesContainer canvas {
@@ -832,6 +894,7 @@ body {
     display: block;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     border-radius: 3px;
+    transition: transform 0.2s ease;
 }
 
 .pdf-scroll-indicator {
@@ -877,13 +940,28 @@ body {
         padding: 10px;
     }
     
+    .pdf-header {
+        padding: 10px;
+    }
+    
     .pdf-scroll-container {
         padding: 10px;
-        max-height: 500px;
+        max-height: 600px;
     }
     
     .page-info {
         font-size: 13px;
+    }
+    
+    .zoom-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 16px;
+    }
+    
+    #zoomLevel {
+        font-size: 13px;
+        min-width: 45px;
     }
     
     #pdfPagesContainer {

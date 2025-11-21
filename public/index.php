@@ -109,10 +109,18 @@ $csrfToken = generateCSRFToken();
                             Carregando documento...
                         </div>
                         
-                        <div class="pdf-info" id="pdfInfo" style="display: none;">
-                            <span class="page-info">
-                                📄 Documento com <span id="pageCount">-</span> páginas - Role para ler todo o conteúdo
-                            </span>
+                        <div class="pdf-header" id="pdfHeader" style="display: none;">
+                            <div class="pdf-info">
+                                <span class="page-info">
+                                    📄 Documento com <span id="pageCount">-</span> páginas
+                                </span>
+                            </div>
+                            <div class="pdf-zoom-controls">
+                                <button type="button" id="zoomOut" class="zoom-btn" title="Diminuir zoom">-</button>
+                                <span id="zoomLevel">100%</span>
+                                <button type="button" id="zoomIn" class="zoom-btn" title="Aumentar zoom">+</button>
+                                <button type="button" id="zoomReset" class="zoom-btn-reset" title="Resetar zoom">↻</button>
+                            </div>
                         </div>
                         
                         <div class="pdf-scroll-container" id="pdfScrollContainer" style="display: none;">

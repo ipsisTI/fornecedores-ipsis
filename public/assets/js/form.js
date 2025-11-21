@@ -427,11 +427,12 @@ function showMessage(message, type) {
 
 /**
  * ===================================
- * PDF Viewer com PDF.js - Scroll Contínuo
+ * PDF Viewer com PDF.js - Scroll Contínuo + Zoom
  * ===================================
  */
 let pdfDoc = null;
 let hasScrolledToBottom = false;
+let currentZoom = 1.0;
 
 // Configurar PDF.js
 if (typeof pdfjsLib !== 'undefined') {
@@ -440,19 +441,20 @@ if (typeof pdfjsLib !== 'undefined') {
     // Elementos
     const pdfUrl = 'doc/Código de Relacionamento para Fornecedores de Bens e Serviços_2025.pdf';
     const loadingDiv = document.getElementById('pdfLoading');
-    const pdfInfo = document.getElementById('pdfInfo');
+    const pdfHeader = document.getElementById('pdfHeader');
     const scrollContainer = document.getElementById('pdfScrollContainer');
     const pagesContainer = document.getElementById('pdfPagesContainer');
     const scrollIndicator = document.getElementById('scrollIndicator');
+    const zoomLevelSpan = document.getElementById('zoomLevel');
     
     // Detectar se é mobile
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const scale = isMobile ? 1.0 : 1.3;
+    const baseScale = isMobile ? 1.4 : 1.6;
     
     /**
      * Renderizar uma página específica
      */
-    function renderPage(pageNumber) {
+    function renderPage(pageNumber, scale) {
         return pdfDoc.getPage(pageNumber).then(function(page) {
             const viewport = page.getViewport({scale: scale});
             
@@ -478,15 +480,76 @@ if (typeof pdfjsLib !== 'undefined') {
     /**
      * Renderizar todas as páginas
      */
-    async function renderAllPages() {
+    async function renderAllPages(scale) {
         const numPages = pdfDoc.numPages;
         
         for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-            await renderPage(pageNum);
+            await renderPage(pageNum, scale);
         }
         
-        console.log('Todas as páginas renderizadas');
+        console.log('Todas as páginas renderizadas com escala:', scale);
     }
+    
+    /**
+     * Re-renderizar com novo zoom
+     */
+    async function reRenderWithZoom() {
+        // Salvar posição do scroll
+        const scrollPercentage = scrollContainer.scrollTop / scrollContainer.scrollHeight;
+        
+        // Limpar páginas existentes
+        pagesContainer.innerHTML = '';
+        
+        // Calcular nova escala
+        const newScale = baseScale * currentZoom;
+        
+        // Renderizar novamente
+        await renderAllPages(newScale);
+        
+        // Restaurar posição do scroll
+        setTimeout(() => {
+            scrollContainer.scrollTop = scrollContainer.scrollHeight * scrollPercentage;
+        }, 100);
+    }
+    
+    /**
+     * Atualizar display do zoom
+     */
+    function updateZoomDisplay() {
+        const percentage = Math.round(currentZoom * 100);
+        zoomLevelSpan.textContent = percentage + '%';
+    }
+    
+    /**
+     * Zoom In
+     */
+    document.getElementById('zoomIn').addEventListener('click', function() {
+        if (currentZoom < 2.0) {
+            currentZoom += 0.2;
+            updateZoomDisplay();
+            reRenderWithZoom();
+        }
+    });
+    
+    /**
+     * Zoom Out
+     */
+    document.getElementById('zoomOut').addEventListener('click', function() {
+        if (currentZoom > 0.6) {
+            currentZoom -= 0.2;
+            updateZoomDisplay();
+            reRenderWithZoom();
+        }
+    });
+    
+    /**
+     * Reset Zoom
+     */
+    document.getElementById('zoomReset').addEventListener('click', function() {
+        currentZoom = 1.0;
+        updateZoomDisplay();
+        reRenderWithZoom();
+    });
     
     /**
      * Detectar scroll até o final
@@ -543,12 +606,15 @@ if (typeof pdfjsLib !== 'undefined') {
         
         // Esconder loading e mostrar PDF
         loadingDiv.style.display = 'none';
-        pdfInfo.style.display = 'block';
+        pdfHeader.style.display = 'flex';
         scrollContainer.style.display = 'block';
         scrollIndicator.style.display = 'block';
         
+        // Atualizar display do zoom
+        updateZoomDisplay();
+        
         // Renderizar todas as páginas
-        renderAllPages().then(() => {
+        renderAllPages(baseScale * currentZoom).then(() => {
             // Adicionar listener de scroll
             scrollContainer.addEventListener('scroll', checkScrollPosition);
             
