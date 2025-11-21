@@ -1,0 +1,35 @@
+# Arquivos sensíveis - NÃO ENVIAR
+.env
+src/config/credentials.json
+
+# Dependências
+vendor/
+node_modules/
+
+# Uploads
+uploads/signed/*.pdf
+uploads/assinaturas/*.png
+
+# Arquivos de teste
+test-*.php
+public/debug*.php
+public/test-post.php
+
+# Logs
+*.log
+
+# Sistema
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# Backup
+*.backup
+*.bak
