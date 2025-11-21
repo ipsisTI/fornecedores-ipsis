@@ -423,3 +423,156 @@ function showMessage(message, type) {
         messageElement.style.display = 'none';
     }, 30000);
 }
+
+
+/**
+ * ===================================
+ * PDF Viewer com PDF.js
+ * ===================================
+ */
+let pdfDoc = null;
+let pageNum = 1;
+let pageRendering = false;
+let pageNumPending = null;
+let lastPageReached = false;
+
+// Configurar PDF.js
+if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    
+    // Carregar PDF ao iniciar
+    const pdfUrl = 'doc/Código de Relacionamento para Fornecedores de Bens e Serviços_2025.pdf';
+    const loadingDiv = document.getElementById('pdfLoading');
+    const controlsDiv = document.getElementById('pdfControls');
+    const canvasWrapper = document.getElementById('pdfCanvasWrapper');
+    const canvas = document.getElementById('pdfCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Detectar se é mobile
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const scale = isMobile ? 1.2 : 1.5;
+    
+    /**
+     * Renderizar página do PDF
+     */
+    function renderPage(num) {
+        pageRendering = true;
+        
+        pdfDoc.getPage(num).then(function(page) {
+            const viewport = page.getViewport({scale: scale});
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            
+            const renderContext = {
+                canvasContext: ctx,
+                viewport: viewport
+            };
+            
+            const renderTask = page.render(renderContext);
+            
+            renderTask.promise.then(function() {
+                pageRendering = false;
+                
+                if (pageNumPending !== null) {
+                    renderPage(pageNumPending);
+                    pageNumPending = null;
+                }
+                
+                // Verificar se chegou na última página
+                if (num === pdfDoc.numPages) {
+                    lastPageReached = true;
+                    document.getElementById('scrollIndicator').style.display = 'none';
+                    document.getElementById('pdfConfirmContainer').style.display = 'block';
+                }
+            });
+        });
+        
+        document.getElementById('pageNum').textContent = num;
+        updatePdfButtons();
+    }
+    
+    /**
+     * Enfileirar renderização de página
+     */
+    function queueRenderPage(num) {
+        if (pageRendering) {
+            pageNumPending = num;
+        } else {
+            renderPage(num);
+        }
+    }
+    
+    /**
+     * Atualizar estado dos botões
+     */
+    function updatePdfButtons() {
+        document.getElementById('prevPage').disabled = (pageNum <= 1);
+        document.getElementById('nextPage').disabled = (pageNum >= pdfDoc.numPages);
+        
+        // Mostrar indicador se não chegou na última página
+        if (pageNum < pdfDoc.numPages && !lastPageReached) {
+            document.getElementById('scrollIndicator').style.display = 'block';
+        } else {
+            document.getElementById('scrollIndicator').style.display = 'none';
+        }
+    }
+    
+    /**
+     * Página anterior
+     */
+    document.getElementById('prevPage').addEventListener('click', function() {
+        if (pageNum <= 1) {
+            return;
+        }
+        pageNum--;
+        queueRenderPage(pageNum);
+    });
+    
+    /**
+     * Próxima página
+     */
+    document.getElementById('nextPage').addEventListener('click', function() {
+        if (pageNum >= pdfDoc.numPages) {
+            return;
+        }
+        pageNum++;
+        queueRenderPage(pageNum);
+    });
+    
+    /**
+     * Confirmar leitura do documento
+     */
+    document.getElementById('btnConfirmRead').addEventListener('click', function() {
+        if (!lastPageReached) {
+            alert('Por favor, navegue até a última página do documento antes de continuar.');
+            return;
+        }
+        
+        // Mostrar checkbox de aceite
+        document.getElementById('termosGroup').style.display = 'block';
+        document.getElementById('pdfConfirmContainer').style.display = 'none';
+        
+        // Scroll suave até o checkbox
+        document.getElementById('termosGroup').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    
+    /**
+     * Carregar PDF
+     */
+    pdfjsLib.getDocument(pdfUrl).promise.then(function(pdfDoc_) {
+        pdfDoc = pdfDoc_;
+        document.getElementById('pageCount').textContent = pdfDoc.numPages;
+        
+        // Esconder loading e mostrar PDF
+        loadingDiv.style.display = 'none';
+        controlsDiv.style.display = 'flex';
+        canvasWrapper.style.display = 'flex';
+        document.getElementById('scrollIndicator').style.display = 'block';
+        
+        // Renderizar primeira página
+        renderPage(pageNum);
+    }).catch(function(error) {
+        console.error('Erro ao carregar PDF:', error);
+        loadingDiv.innerHTML = 'Erro ao carregar o documento. <a href="' + pdfUrl + '" target="_blank">Clique aqui para abrir em nova aba</a>';
+    });
+}

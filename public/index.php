@@ -11,6 +11,7 @@ $csrfToken = generateCSRFToken();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro de Fornecedores - Ipsis</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://www.google.com/recaptcha/api.js?render=<?php echo RECAPTCHA_SITE_KEY; ?>"></script>
 </head>
 <body>
@@ -101,27 +102,31 @@ $csrfToken = generateCSRFToken();
                 <!-- Código de Relacionamento -->
                 <section class="form-section">
                     <h2 class="section-title">Código de Relacionamento para Fornecedores</h2>
-                    <p class="section-description">Por favor, leia o documento completo abaixo. Role até o final para habilitar a assinatura.</p>
+                    <p class="section-description">Por favor, leia o documento completo abaixo navegando entre as páginas.</p>
                     
                     <div class="pdf-viewer-container">
-                        <iframe 
-                            id="pdfViewer" 
-                            src="doc/Código de Relacionamento para Fornecedores de Bens e Serviços_2025.pdf"
-                            type="application/pdf"
-                            class="pdf-iframe"
-                        ></iframe>
-                        <div class="pdf-mobile-fallback">
-                            <p>📱 Visualizando no celular?</p>
-                            <a href="doc/Código de Relacionamento para Fornecedores de Bens e Serviços_2025.pdf" target="_blank" class="btn-open-pdf">
-                                📄 Abrir Documento em Nova Aba
-                            </a>
+                        <div class="pdf-loading" id="pdfLoading">
+                            Carregando documento...
                         </div>
-                        <div class="pdf-scroll-indicator" id="scrollIndicator">
-                            <span>📄 Visualize o documento acima</span>
+                        
+                        <div class="pdf-controls" id="pdfControls" style="display: none;">
+                            <button type="button" id="prevPage" class="pdf-nav-btn">← Anterior</button>
+                            <span class="page-info">
+                                Página <span id="pageNum">1</span> de <span id="pageCount">-</span>
+                            </span>
+                            <button type="button" id="nextPage" class="pdf-nav-btn">Próxima →</button>
+                        </div>
+                        
+                        <div class="pdf-canvas-wrapper" id="pdfCanvasWrapper" style="display: none;">
+                            <canvas id="pdfCanvas"></canvas>
+                        </div>
+                        
+                        <div class="pdf-scroll-indicator" id="scrollIndicator" style="display: none;">
+                            <span>📄 Continue navegando até a última página</span>
                         </div>
                     </div>
                     
-                    <div class="pdf-confirm-container" id="pdfConfirmContainer">
+                    <div class="pdf-confirm-container" id="pdfConfirmContainer" style="display: none;">
                         <button type="button" class="btn-confirm-read" id="btnConfirmRead">
                             ✓ Li todo o documento e desejo continuar
                         </button>
