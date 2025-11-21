@@ -109,20 +109,18 @@ $csrfToken = generateCSRFToken();
                             Carregando documento...
                         </div>
                         
-                        <div class="pdf-controls" id="pdfControls" style="display: none;">
-                            <button type="button" id="prevPage" class="pdf-nav-btn">← Anterior</button>
+                        <div class="pdf-info" id="pdfInfo" style="display: none;">
                             <span class="page-info">
-                                Página <span id="pageNum">1</span> de <span id="pageCount">-</span>
+                                📄 Documento com <span id="pageCount">-</span> páginas - Role para ler todo o conteúdo
                             </span>
-                            <button type="button" id="nextPage" class="pdf-nav-btn">Próxima →</button>
                         </div>
                         
-                        <div class="pdf-canvas-wrapper" id="pdfCanvasWrapper" style="display: none;">
-                            <canvas id="pdfCanvas"></canvas>
+                        <div class="pdf-scroll-container" id="pdfScrollContainer" style="display: none;">
+                            <div id="pdfPagesContainer"></div>
                         </div>
                         
                         <div class="pdf-scroll-indicator" id="scrollIndicator" style="display: none;">
-                            <span>📄 Continue navegando até a última página</span>
+                            <span>⬇️ Role até o final do documento para continuar</span>
                         </div>
                     </div>
                     

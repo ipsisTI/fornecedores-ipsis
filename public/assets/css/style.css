@@ -795,67 +795,59 @@ body {
     font-size: 16px;
 }
 
-.pdf-controls {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
+.pdf-info {
+    text-align: center;
     margin-bottom: 15px;
-    flex-wrap: wrap;
-}
-
-.pdf-nav-btn {
-    background: #0066cc;
-    color: white;
-    border: none;
-    padding: 10px 20px;
+    padding: 10px;
+    background: #e3f2fd;
     border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: background 0.3s;
-}
-
-.pdf-nav-btn:hover:not(:disabled) {
-    background: #0052a3;
-}
-
-.pdf-nav-btn:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-    opacity: 0.6;
 }
 
 .page-info {
     font-weight: 600;
-    color: #333;
+    color: #1976d2;
     font-size: 14px;
 }
 
-.pdf-canvas-wrapper {
-    display: flex;
-    justify-content: center;
+.pdf-scroll-container {
     background: white;
     border-radius: 5px;
     padding: 20px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    overflow-x: auto;
+    max-height: 600px;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
-#pdfCanvas {
+#pdfPagesContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+#pdfPagesContainer canvas {
     max-width: 100%;
     height: auto;
     display: block;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 3px;
 }
 
 .pdf-scroll-indicator {
     text-align: center;
     margin-top: 15px;
-    padding: 10px;
+    padding: 12px;
     background: #fff3cd;
     border-radius: 5px;
     color: #856404;
     font-weight: 500;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
 }
 
 .pdf-confirm-container {
@@ -885,20 +877,20 @@ body {
         padding: 10px;
     }
     
-    .pdf-canvas-wrapper {
+    .pdf-scroll-container {
         padding: 10px;
-    }
-    
-    .pdf-nav-btn {
-        padding: 8px 15px;
-        font-size: 13px;
+        max-height: 500px;
     }
     
     .page-info {
         font-size: 13px;
     }
     
-    #pdfCanvas {
+    #pdfPagesContainer {
+        gap: 15px;
+    }
+    
+    #pdfPagesContainer canvas {
         width: 100% !important;
         height: auto !important;
     }

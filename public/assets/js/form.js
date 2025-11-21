@@ -427,124 +427,99 @@ function showMessage(message, type) {
 
 /**
  * ===================================
- * PDF Viewer com PDF.js
+ * PDF Viewer com PDF.js - Scroll Contínuo
  * ===================================
  */
 let pdfDoc = null;
-let pageNum = 1;
-let pageRendering = false;
-let pageNumPending = null;
-let lastPageReached = false;
+let hasScrolledToBottom = false;
 
 // Configurar PDF.js
 if (typeof pdfjsLib !== 'undefined') {
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     
-    // Carregar PDF ao iniciar
+    // Elementos
     const pdfUrl = 'doc/Código de Relacionamento para Fornecedores de Bens e Serviços_2025.pdf';
     const loadingDiv = document.getElementById('pdfLoading');
-    const controlsDiv = document.getElementById('pdfControls');
-    const canvasWrapper = document.getElementById('pdfCanvasWrapper');
-    const canvas = document.getElementById('pdfCanvas');
-    const ctx = canvas.getContext('2d');
+    const pdfInfo = document.getElementById('pdfInfo');
+    const scrollContainer = document.getElementById('pdfScrollContainer');
+    const pagesContainer = document.getElementById('pdfPagesContainer');
+    const scrollIndicator = document.getElementById('scrollIndicator');
     
     // Detectar se é mobile
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const scale = isMobile ? 1.2 : 1.5;
+    const scale = isMobile ? 1.0 : 1.3;
     
     /**
-     * Renderizar página do PDF
+     * Renderizar uma página específica
      */
-    function renderPage(num) {
-        pageRendering = true;
-        
-        pdfDoc.getPage(num).then(function(page) {
+    function renderPage(pageNumber) {
+        return pdfDoc.getPage(pageNumber).then(function(page) {
             const viewport = page.getViewport({scale: scale});
+            
+            // Criar canvas para esta página
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
             canvas.height = viewport.height;
             canvas.width = viewport.width;
+            canvas.className = 'pdf-page';
+            canvas.dataset.page = pageNumber;
+            
+            pagesContainer.appendChild(canvas);
             
             const renderContext = {
                 canvasContext: ctx,
                 viewport: viewport
             };
             
-            const renderTask = page.render(renderContext);
-            
-            renderTask.promise.then(function() {
-                pageRendering = false;
-                
-                if (pageNumPending !== null) {
-                    renderPage(pageNumPending);
-                    pageNumPending = null;
-                }
-                
-                // Verificar se chegou na última página
-                if (num === pdfDoc.numPages) {
-                    lastPageReached = true;
-                    document.getElementById('scrollIndicator').style.display = 'none';
-                    document.getElementById('pdfConfirmContainer').style.display = 'block';
-                }
-            });
+            return page.render(renderContext).promise;
         });
+    }
+    
+    /**
+     * Renderizar todas as páginas
+     */
+    async function renderAllPages() {
+        const numPages = pdfDoc.numPages;
         
-        document.getElementById('pageNum').textContent = num;
-        updatePdfButtons();
-    }
-    
-    /**
-     * Enfileirar renderização de página
-     */
-    function queueRenderPage(num) {
-        if (pageRendering) {
-            pageNumPending = num;
-        } else {
-            renderPage(num);
+        for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+            await renderPage(pageNum);
         }
-    }
-    
-    /**
-     * Atualizar estado dos botões
-     */
-    function updatePdfButtons() {
-        document.getElementById('prevPage').disabled = (pageNum <= 1);
-        document.getElementById('nextPage').disabled = (pageNum >= pdfDoc.numPages);
         
-        // Mostrar indicador se não chegou na última página
-        if (pageNum < pdfDoc.numPages && !lastPageReached) {
-            document.getElementById('scrollIndicator').style.display = 'block';
-        } else {
-            document.getElementById('scrollIndicator').style.display = 'none';
-        }
+        console.log('Todas as páginas renderizadas');
     }
     
     /**
-     * Página anterior
+     * Detectar scroll até o final
      */
-    document.getElementById('prevPage').addEventListener('click', function() {
-        if (pageNum <= 1) {
-            return;
+    function checkScrollPosition() {
+        const scrollTop = scrollContainer.scrollTop;
+        const scrollHeight = scrollContainer.scrollHeight;
+        const clientHeight = scrollContainer.clientHeight;
+        
+        // Verificar se chegou perto do final (90%)
+        const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
+        
+        if (scrollPercentage >= 0.9 && !hasScrolledToBottom) {
+            hasScrolledToBottom = true;
+            scrollIndicator.style.display = 'none';
+            document.getElementById('pdfConfirmContainer').style.display = 'block';
+            
+            // Scroll suave até o botão
+            setTimeout(() => {
+                document.getElementById('pdfConfirmContainer').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+            }, 300);
         }
-        pageNum--;
-        queueRenderPage(pageNum);
-    });
-    
-    /**
-     * Próxima página
-     */
-    document.getElementById('nextPage').addEventListener('click', function() {
-        if (pageNum >= pdfDoc.numPages) {
-            return;
-        }
-        pageNum++;
-        queueRenderPage(pageNum);
-    });
+    }
     
     /**
      * Confirmar leitura do documento
      */
     document.getElementById('btnConfirmRead').addEventListener('click', function() {
-        if (!lastPageReached) {
-            alert('Por favor, navegue até a última página do documento antes de continuar.');
+        if (!hasScrolledToBottom) {
+            alert('Por favor, role até o final do documento antes de continuar.');
             return;
         }
         
@@ -553,11 +528,14 @@ if (typeof pdfjsLib !== 'undefined') {
         document.getElementById('pdfConfirmContainer').style.display = 'none';
         
         // Scroll suave até o checkbox
-        document.getElementById('termosGroup').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        document.getElementById('termosGroup').scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+        });
     });
     
     /**
-     * Carregar PDF
+     * Carregar e renderizar PDF
      */
     pdfjsLib.getDocument(pdfUrl).promise.then(function(pdfDoc_) {
         pdfDoc = pdfDoc_;
@@ -565,12 +543,19 @@ if (typeof pdfjsLib !== 'undefined') {
         
         // Esconder loading e mostrar PDF
         loadingDiv.style.display = 'none';
-        controlsDiv.style.display = 'flex';
-        canvasWrapper.style.display = 'flex';
-        document.getElementById('scrollIndicator').style.display = 'block';
+        pdfInfo.style.display = 'block';
+        scrollContainer.style.display = 'block';
+        scrollIndicator.style.display = 'block';
         
-        // Renderizar primeira página
-        renderPage(pageNum);
+        // Renderizar todas as páginas
+        renderAllPages().then(() => {
+            // Adicionar listener de scroll
+            scrollContainer.addEventListener('scroll', checkScrollPosition);
+            
+            // Verificar posição inicial
+            checkScrollPosition();
+        });
+        
     }).catch(function(error) {
         console.error('Erro ao carregar PDF:', error);
         loadingDiv.innerHTML = 'Erro ao carregar o documento. <a href="' + pdfUrl + '" target="_blank">Clique aqui para abrir em nova aba</a>';
