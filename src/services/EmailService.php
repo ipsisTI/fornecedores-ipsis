@@ -1,238 +1,204 @@
 <?php
-namespace Ipsis\services;
 
-require_once __DIR__ . '/../../vendor/autoload.php';
+namespace Ipsis\services;
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 /**
- * Serviço de Email
- * 
- * Gerencia envio de emails usando PHPMailer
+ * Serviço de envio de emails
  */
-class EmailService {
-    
+class EmailService
+{
     private $mailer;
-    
-    public function __construct() {
+
+    public function __construct()
+    {
         $this->mailer = new PHPMailer(true);
-        $this->configure();
+        
+        // Configuração SMTP
+        $this->mailer->isSMTP();
+        $this->mailer->Host = SMTP_HOST;
+        $this->mailer->SMTPAuth = true;
+        $this->mailer->Username = SMTP_USER;
+        $this->mailer->Password = SMTP_PASS;
+        $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $this->mailer->Port = SMTP_PORT;
+        $this->mailer->CharSet = 'UTF-8';
+        
+        // Remetente padrão
+        $this->mailer->setFrom(SMTP_FROM, SMTP_FROM_NAME);
     }
-    
-    /**
-     * Configura PHPMailer
-     */
-    private function configure() {
-        try {
-            $this->mailer->isSMTP();
-            $this->mailer->Host = SMTP_HOST;
-            $this->mailer->SMTPAuth = true;
-            $this->mailer->Username = SMTP_USER;
-            $this->mailer->Password = SMTP_PASS;
-            $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $this->mailer->Port = SMTP_PORT;
-            $this->mailer->CharSet = 'UTF-8';
-            $this->mailer->setFrom(SMTP_FROM, SMTP_FROM_NAME);
-        } catch (Exception $e) {
-            logError('Erro ao configurar email: ' . $e->getMessage());
-        }
-    }
-    
+
     /**
      * Envia email de confirmação para o fornecedor
      */
-    public function sendConfirmationEmail($data) {
+    public function enviarConfirmacaoFornecedor($dados)
+    {
         try {
             $this->mailer->clearAddresses();
-            $this->mailer->addAddress($data['email'], $data['razao_social']);
+            $this->mailer->addAddress($dados['email'], $dados['razao_social']);
             
             $this->mailer->isHTML(true);
             $this->mailer->Subject = 'Cadastro Recebido - Ipsis';
-            $this->mailer->Body = $this->getConfirmationTemplate($data);
-            $this->mailer->AltBody = $this->getConfirmationTextTemplate($data);
             
-            return $this->mailer->send();
+            $this->mailer->Body = $this->templateConfirmacaoFornecedor($dados);
+            $this->mailer->AltBody = strip_tags($this->mailer->Body);
+            
+            $this->mailer->send();
+            return true;
         } catch (Exception $e) {
-            logError('Erro ao enviar email de confirmação: ' . $e->getMessage(), $data);
+            error_log('Erro ao enviar email para fornecedor: ' . $e->getMessage());
             return false;
         }
     }
-    
+
     /**
      * Envia notificação para o admin
      */
-    public function sendAdminNotification($data) {
+    public function enviarNotificacaoAdmin($dados)
+    {
         try {
             $this->mailer->clearAddresses();
             $this->mailer->addAddress(ADMIN_EMAIL);
             
             $this->mailer->isHTML(true);
-            $this->mailer->Subject = 'Novo Cadastro de Fornecedor - ' . $data['razao_social'];
-            $this->mailer->Body = $this->getAdminTemplate($data);
-            $this->mailer->AltBody = $this->getAdminTextTemplate($data);
+            $this->mailer->Subject = 'Novo Cadastro de Fornecedor - ' . $dados['razao_social'];
             
-            return $this->mailer->send();
+            $this->mailer->Body = $this->templateNotificacaoAdmin($dados);
+            $this->mailer->AltBody = strip_tags($this->mailer->Body);
+            
+            $this->mailer->send();
+            return true;
         } catch (Exception $e) {
-            logError('Erro ao enviar notificação admin: ' . $e->getMessage(), $data);
+            error_log('Erro ao enviar email para admin: ' . $e->getMessage());
             return false;
         }
     }
-    
+
     /**
-     * Template HTML de confirmação
+     * Template de email para o fornecedor
      */
-    private function getConfirmationTemplate($data) {
+    private function templateConfirmacaoFornecedor($dados)
+    {
         return '
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background: #0066cc; color: white; padding: 20px; text-align: center; }
-                .content { background: #f9f9f9; padding: 30px; }
-                .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
-                .button { display: inline-block; padding: 12px 30px; background: #0066cc; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-                .info { background: white; padding: 15px; margin: 15px 0; border-left: 4px solid #0066cc; }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header">
-                    <h1>Cadastro Recebido com Sucesso!</h1>
-                </div>
-                <div class="content">
-                    <p>Olá, <strong>' . htmlspecialchars($data['razao_social']) . '</strong>!</p>
-                    
-                    <p>Recebemos seu cadastro como fornecedor da Ipsis. Seus dados estão sendo analisados por nossa equipe.</p>
-                    
-                    <div class="info">
-                        <h3>Dados Cadastrados:</h3>
-                        <p><strong>Razão Social:</strong> ' . htmlspecialchars($data['razao_social']) . '</p>
-                        <p><strong>Nome Fantasia:</strong> ' . htmlspecialchars($data['nome_fantasia']) . '</p>
-                        <p><strong>CNPJ:</strong> ' . formatCNPJ($data['cnpj']) . '</p>
-                        <p><strong>Email:</strong> ' . htmlspecialchars($data['email']) . '</p>
-                        <p><strong>Telefone:</strong> ' . formatPhone($data['telefone']) . '</p>
-                        <p><strong>Tipo de Serviço:</strong> ' . htmlspecialchars($data['tipo_servico']) . '</p>
-                    </div>
-                    
-                    <p>Em breve entraremos em contato para dar continuidade ao processo de qualificação.</p>
-                    
-                    <p>Se você tiver alguma dúvida, não hesite em nos contatar.</p>
-                    
-                    <p style="margin-top: 30px;">Atenciosamente,<br><strong>Equipe Ipsis</strong></p>
-                </div>
-                <div class="footer">
-                    <p>Este é um email automático, por favor não responda.</p>
-                    <p>&copy; ' . date('Y') . ' Ipsis. Todos os direitos reservados.</p>
-                    <p><a href="https://ipsis.com.br">www.ipsis.com.br</a></p>
-                </div>
-            </div>
-        </body>
-        </html>
-        ';
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #0066cc; color: white; padding: 20px; text-align: center; }
+        .content { background: #f9f9f9; padding: 30px; }
+        .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+        .button { display: inline-block; padding: 12px 24px; background: #0066cc; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Cadastro Recebido com Sucesso!</h1>
+        </div>
+        <div class="content">
+            <p>Olá, <strong>' . htmlspecialchars($dados['razao_social']) . '</strong>!</p>
+            
+            <p>Recebemos seu cadastro como fornecedor da Ipsis. Obrigado por seu interesse em fazer parte da nossa rede de parceiros!</p>
+            
+            <h3>Dados Recebidos:</h3>
+            <ul>
+                <li><strong>Razão Social:</strong> ' . htmlspecialchars($dados['razao_social']) . '</li>
+                <li><strong>CNPJ:</strong> ' . htmlspecialchars($dados['cnpj']) . '</li>
+                <li><strong>Email:</strong> ' . htmlspecialchars($dados['email']) . '</li>
+                <li><strong>Telefone:</strong> ' . htmlspecialchars($dados['telefone']) . '</li>
+            </ul>
+            
+            <h3>Próximos Passos:</h3>
+            <ol>
+                <li>Nossa equipe analisará seu cadastro</li>
+                <li>Entraremos em contato em até 5 dias úteis</li>
+                <li>Caso necessário, solicitaremos documentação adicional</li>
+            </ol>
+            
+            <p><strong>Importante:</strong> Este é um email automático. Não responda a esta mensagem.</p>
+        </div>
+        <div class="footer">
+            <p>&copy; ' . date('Y') . ' Ipsis. Todos os direitos reservados.</p>
+            <p><a href="https://ipsis.com.br">www.ipsis.com.br</a></p>
+        </div>
+    </div>
+</body>
+</html>';
     }
-    
+
     /**
-     * Template texto de confirmação
+     * Template de email para o admin
      */
-    private function getConfirmationTextTemplate($data) {
-        return "
-Cadastro Recebido com Sucesso!
-
-Olá, {$data['razao_social']}!
-
-Recebemos seu cadastro como fornecedor da Ipsis. Seus dados estão sendo analisados por nossa equipe.
-
-Dados Cadastrados:
-- Razão Social: {$data['razao_social']}
-- Nome Fantasia: {$data['nome_fantasia']}
-- CNPJ: " . formatCNPJ($data['cnpj']) . "
-- Email: {$data['email']}
-- Telefone: " . formatPhone($data['telefone']) . "
-- Tipo de Serviço: {$data['tipo_servico']}
-
-Em breve entraremos em contato para dar continuidade ao processo de qualificação.
-
-Atenciosamente,
-Equipe Ipsis
-
-www.ipsis.com.br
-        ";
-    }
-    
-    /**
-     * Template HTML para admin
-     */
-    private function getAdminTemplate($data) {
+    private function templateNotificacaoAdmin($dados)
+    {
         return '
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background: #0066cc; color: white; padding: 20px; }
-                .content { background: #f9f9f9; padding: 30px; }
-                .info { background: white; padding: 15px; margin: 10px 0; border-left: 4px solid #0066cc; }
-                table { width: 100%; border-collapse: collapse; }
-                td { padding: 8px; border-bottom: 1px solid #ddd; }
-                td:first-child { font-weight: bold; width: 40%; }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header">
-                    <h2>Novo Cadastro de Fornecedor</h2>
-                </div>
-                <div class="content">
-                    <p>Um novo fornecedor se cadastrou no sistema.</p>
-                    
-                    <div class="info">
-                        <table>
-                            <tr><td>Data/Hora:</td><td>' . date('d/m/Y H:i:s') . '</td></tr>
-                            <tr><td>Razão Social:</td><td>' . htmlspecialchars($data['razao_social']) . '</td></tr>
-                            <tr><td>Nome Fantasia:</td><td>' . htmlspecialchars($data['nome_fantasia']) . '</td></tr>
-                            <tr><td>CNPJ:</td><td>' . formatCNPJ($data['cnpj']) . '</td></tr>
-                            <tr><td>Endereço:</td><td>' . htmlspecialchars($data['endereco']) . '</td></tr>
-                            <tr><td>Telefone:</td><td>' . formatPhone($data['telefone']) . '</td></tr>
-                            <tr><td>Email:</td><td>' . htmlspecialchars($data['email']) . '</td></tr>
-                            <tr><td>Tipo de Serviço:</td><td>' . htmlspecialchars($data['tipo_servico']) . '</td></tr>
-                            <tr><td>Documento:</td><td>' . htmlspecialchars($data['documento_url']) . '</td></tr>
-                            <tr><td>Assinatura:</td><td>' . htmlspecialchars($data['assinatura_tipo']) . '</td></tr>
-                        </table>
-                    </div>
-                    
-                    <p><a href="https://docs.google.com/spreadsheets/d/' . GOOGLE_SHEET_ID . '" style="display: inline-block; padding: 12px 30px; background: #0066cc; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0;">Ver na Planilha</a></p>
-                </div>
-            </div>
-        </body>
-        </html>
-        ';
-    }
-    
-    /**
-     * Template texto para admin
-     */
-    private function getAdminTextTemplate($data) {
-        return "
-Novo Cadastro de Fornecedor
-
-Data/Hora: " . date('d/m/Y H:i:s') . "
-Razão Social: {$data['razao_social']}
-Nome Fantasia: {$data['nome_fantasia']}
-CNPJ: " . formatCNPJ($data['cnpj']) . "
-Endereço: {$data['endereco']}
-Telefone: " . formatPhone($data['telefone']) . "
-Email: {$data['email']}
-Tipo de Serviço: {$data['tipo_servico']}
-Documento: {$data['documento_url']}
-Assinatura: {$data['assinatura_tipo']}
-
-Ver planilha: https://docs.google.com/spreadsheets/d/" . GOOGLE_SHEET_ID . "
-        ";
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #0066cc; color: white; padding: 20px; }
+        .content { background: #f9f9f9; padding: 30px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #f0f0f0; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Novo Cadastro de Fornecedor</h2>
+        </div>
+        <div class="content">
+            <p>Um novo fornecedor se cadastrou no sistema.</p>
+            
+            <table>
+                <tr>
+                    <th>Campo</th>
+                    <th>Valor</th>
+                </tr>
+                <tr>
+                    <td>Data/Hora</td>
+                    <td>' . date('d/m/Y H:i:s') . '</td>
+                </tr>
+                <tr>
+                    <td>Razão Social</td>
+                    <td>' . htmlspecialchars($dados['razao_social']) . '</td>
+                </tr>
+                <tr>
+                    <td>CNPJ</td>
+                    <td>' . htmlspecialchars($dados['cnpj']) . '</td>
+                </tr>
+                <tr>
+                    <td>Email</td>
+                    <td>' . htmlspecialchars($dados['email']) . '</td>
+                </tr>
+                <tr>
+                    <td>Telefone</td>
+                    <td>' . htmlspecialchars($dados['telefone']) . '</td>
+                </tr>
+                <tr>
+                    <td>Tipo de Serviço</td>
+                    <td>' . htmlspecialchars($dados['tipo_servico']) . '</td>
+                </tr>
+            </table>
+            
+            <p><strong>Ações:</strong></p>
+            <ul>
+                <li>Verificar dados na planilha do Google Sheets</li>
+                <li>Baixar PDF assinado do Google Drive</li>
+                <li>Entrar em contato com o fornecedor</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>';
     }
 }

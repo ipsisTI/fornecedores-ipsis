@@ -108,7 +108,14 @@ $csrfToken = generateCSRFToken();
                             id="pdfViewer" 
                             src="doc/Código de Relacionamento para Fornecedores de Bens e Serviços_2025.pdf"
                             type="application/pdf"
+                            class="pdf-iframe"
                         ></iframe>
+                        <div class="pdf-mobile-fallback">
+                            <p>📱 Visualizando no celular?</p>
+                            <a href="doc/Código de Relacionamento para Fornecedores de Bens e Serviços_2025.pdf" target="_blank" class="btn-open-pdf">
+                                📄 Abrir Documento em Nova Aba
+                            </a>
+                        </div>
                         <div class="pdf-scroll-indicator" id="scrollIndicator">
                             <span>📄 Visualize o documento acima</span>
                         </div>
