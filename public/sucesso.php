@@ -8,8 +8,7 @@ $pdfFile = basename($pdfFile); // Segurança
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro Realizado - Ipsis</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <link rel="stylesheet" href="assets/css/style.css?v=<?php echo time(); ?>">
     <style>
         .pdf-viewer-container {
             margin: 30px 0;
@@ -110,7 +109,11 @@ $pdfFile = basename($pdfFile); // Segurança
                 <div class="pdf-viewer-container">
                     <h3 style="text-align: center; margin-bottom: 20px;">Seu Código de Relacionamento Assinado</h3>
                     
-                    <div class="pdf-controls">
+                    <div class="pdf-loading" id="pdf-loading">
+                        Carregando PDF...
+                    </div>
+                    
+                    <div class="pdf-controls" id="pdf-controls" style="display: none;">
                         <button id="prev-page">← Anterior</button>
                         <span class="page-info">
                             Página <span id="page-num">1</span> de <span id="page-count">-</span>
@@ -118,12 +121,17 @@ $pdfFile = basename($pdfFile); // Segurança
                         <button id="next-page">Próxima →</button>
                     </div>
                     
-                    <div class="pdf-canvas-container">
+                    <div class="pdf-canvas-container" id="pdf-canvas-container" style="display: none;">
                         <canvas id="pdf-canvas"></canvas>
                     </div>
                     
-                    <div class="pdf-loading" id="pdf-loading">
-                        Carregando PDF...
+                    <!-- Fallback para mobile que não suporta canvas -->
+                    <div id="pdf-embed-fallback" style="display: none;">
+                        <iframe 
+                            src="download-pdf.php?file=<?php echo urlencode($pdfFile); ?>" 
+                            style="width: 100%; height: 600px; border: none; border-radius: 5px;"
+                            title="PDF do Código de Relacionamento">
+                        </iframe>
                     </div>
                 </div>
                 
@@ -137,98 +145,122 @@ $pdfFile = basename($pdfFile); // Segurança
                     </a>
                 </div>
                 
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
                 <script>
-                    // Configurar PDF.js
-                    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-                    
                     const pdfUrl = 'download-pdf.php?file=<?php echo urlencode($pdfFile); ?>';
-                    let pdfDoc = null;
-                    let pageNum = 1;
-                    let pageRendering = false;
-                    let pageNumPending = null;
-                    const scale = 1.5;
-                    const canvas = document.getElementById('pdf-canvas');
-                    const ctx = canvas.getContext('2d');
                     const loadingDiv = document.getElementById('pdf-loading');
+                    const canvasContainer = document.getElementById('pdf-canvas-container');
+                    const controls = document.getElementById('pdf-controls');
+                    const embedFallback = document.getElementById('pdf-embed-fallback');
                     
-                    // Renderizar página
-                    function renderPage(num) {
-                        pageRendering = true;
+                    // Detectar se é mobile
+                    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                    
+                    // Tentar usar PDF.js primeiro
+                    if (typeof pdfjsLib !== 'undefined') {
+                        // Configurar PDF.js
+                        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
                         
-                        pdfDoc.getPage(num).then(function(page) {
-                            const viewport = page.getViewport({scale: scale});
-                            canvas.height = viewport.height;
-                            canvas.width = viewport.width;
+                        let pdfDoc = null;
+                        let pageNum = 1;
+                        let pageRendering = false;
+                        let pageNumPending = null;
+                        const scale = isMobile ? 1.2 : 1.5;
+                        const canvas = document.getElementById('pdf-canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Renderizar página
+                        function renderPage(num) {
+                            pageRendering = true;
                             
-                            const renderContext = {
-                                canvasContext: ctx,
-                                viewport: viewport
-                            };
-                            
-                            const renderTask = page.render(renderContext);
-                            
-                            renderTask.promise.then(function() {
-                                pageRendering = false;
-                                loadingDiv.style.display = 'none';
+                            pdfDoc.getPage(num).then(function(page) {
+                                const viewport = page.getViewport({scale: scale});
+                                canvas.height = viewport.height;
+                                canvas.width = viewport.width;
                                 
-                                if (pageNumPending !== null) {
-                                    renderPage(pageNumPending);
-                                    pageNumPending = null;
-                                }
+                                const renderContext = {
+                                    canvasContext: ctx,
+                                    viewport: viewport
+                                };
+                                
+                                const renderTask = page.render(renderContext);
+                                
+                                renderTask.promise.then(function() {
+                                    pageRendering = false;
+                                    
+                                    if (pageNumPending !== null) {
+                                        renderPage(pageNumPending);
+                                        pageNumPending = null;
+                                    }
+                                });
                             });
+                            
+                            document.getElementById('page-num').textContent = num;
+                        }
+                        
+                        // Enfileirar renderização
+                        function queueRenderPage(num) {
+                            if (pageRendering) {
+                                pageNumPending = num;
+                            } else {
+                                renderPage(num);
+                            }
+                        }
+                        
+                        // Página anterior
+                        function onPrevPage() {
+                            if (pageNum <= 1) {
+                                return;
+                            }
+                            pageNum--;
+                            queueRenderPage(pageNum);
+                            updateButtons();
+                        }
+                        document.getElementById('prev-page').addEventListener('click', onPrevPage);
+                        
+                        // Próxima página
+                        function onNextPage() {
+                            if (pageNum >= pdfDoc.numPages) {
+                                return;
+                            }
+                            pageNum++;
+                            queueRenderPage(pageNum);
+                            updateButtons();
+                        }
+                        document.getElementById('next-page').addEventListener('click', onNextPage);
+                        
+                        // Atualizar botões
+                        function updateButtons() {
+                            document.getElementById('prev-page').disabled = (pageNum <= 1);
+                            document.getElementById('next-page').disabled = (pageNum >= pdfDoc.numPages);
+                        }
+                        
+                        // Carregar PDF
+                        pdfjsLib.getDocument(pdfUrl).promise.then(function(pdfDoc_) {
+                            pdfDoc = pdfDoc_;
+                            document.getElementById('page-count').textContent = pdfDoc.numPages;
+                            
+                            // Mostrar canvas e controles
+                            loadingDiv.style.display = 'none';
+                            canvasContainer.style.display = 'flex';
+                            controls.style.display = 'flex';
+                            
+                            renderPage(pageNum);
+                            updateButtons();
+                        }).catch(function(error) {
+                            console.error('Erro ao carregar PDF com PDF.js:', error);
+                            // Usar fallback
+                            useFallback();
                         });
-                        
-                        document.getElementById('page-num').textContent = num;
+                    } else {
+                        // PDF.js não carregou, usar fallback
+                        useFallback();
                     }
                     
-                    // Enfileirar renderização
-                    function queueRenderPage(num) {
-                        if (pageRendering) {
-                            pageNumPending = num;
-                        } else {
-                            renderPage(num);
-                        }
+                    function useFallback() {
+                        loadingDiv.style.display = 'none';
+                        embedFallback.style.display = 'block';
                     }
-                    
-                    // Página anterior
-                    function onPrevPage() {
-                        if (pageNum <= 1) {
-                            return;
-                        }
-                        pageNum--;
-                        queueRenderPage(pageNum);
-                        updateButtons();
-                    }
-                    document.getElementById('prev-page').addEventListener('click', onPrevPage);
-                    
-                    // Próxima página
-                    function onNextPage() {
-                        if (pageNum >= pdfDoc.numPages) {
-                            return;
-                        }
-                        pageNum++;
-                        queueRenderPage(pageNum);
-                        updateButtons();
-                    }
-                    document.getElementById('next-page').addEventListener('click', onNextPage);
-                    
-                    // Atualizar botões
-                    function updateButtons() {
-                        document.getElementById('prev-page').disabled = (pageNum <= 1);
-                        document.getElementById('next-page').disabled = (pageNum >= pdfDoc.numPages);
-                    }
-                    
-                    // Carregar PDF
-                    pdfjsLib.getDocument(pdfUrl).promise.then(function(pdfDoc_) {
-                        pdfDoc = pdfDoc_;
-                        document.getElementById('page-count').textContent = pdfDoc.numPages;
-                        
-                        renderPage(pageNum);
-                        updateButtons();
-                    }).catch(function(error) {
-                        loadingDiv.innerHTML = 'Erro ao carregar PDF. <a href="' + pdfUrl + '" target="_blank">Clique aqui para abrir</a>';
-                        console.error('Erro ao carregar PDF:', error);
-                    });
                 </script>
                 
                 <?php endif; ?>
