@@ -449,7 +449,7 @@ if (typeof pdfjsLib !== 'undefined') {
     
     // Detectar se é mobile
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const baseScale = 1.0; // Escala base, será ajustada automaticamente
+    const baseScale = isMobile ? 2.0 : 1.0; // Escala maior no mobile para melhor resolução
     
     /**
      * Renderizar uma página específica
