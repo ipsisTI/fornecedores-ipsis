@@ -449,20 +449,26 @@ if (typeof pdfjsLib !== 'undefined') {
     
     // Detectar se é mobile
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const baseScale = isMobile ? 1.4 : 1.6;
+    const baseScale = 1.0; // Escala base, será ajustada automaticamente
     
     /**
      * Renderizar uma página específica
      */
     function renderPage(pageNumber, scale) {
         return pdfDoc.getPage(pageNumber).then(function(page) {
-            const viewport = page.getViewport({scale: scale});
+            // Calcular escala baseada na largura FIXA do container
+            const containerWidth = scrollContainer.clientWidth - 40; // menos padding e scrollbar
+            const viewport = page.getViewport({scale: 1});
+            const scaleToFit = containerWidth / viewport.width;
+            const finalScale = scale * scaleToFit;
+            
+            const scaledViewport = page.getViewport({scale: finalScale});
             
             // Criar canvas para esta página
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
+            canvas.height = scaledViewport.height;
+            canvas.width = scaledViewport.width;
             canvas.className = 'pdf-page';
             canvas.dataset.page = pageNumber;
             
@@ -470,7 +476,7 @@ if (typeof pdfjsLib !== 'undefined') {
             
             const renderContext = {
                 canvasContext: ctx,
-                viewport: viewport
+                viewport: scaledViewport
             };
             
             return page.render(renderContext).promise;
