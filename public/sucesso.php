@@ -101,7 +101,7 @@ $pdfFile = basename($pdfFile); // Segurança
             <div class="success-container">
                 <div class="success-icon">✓</div>
                 <h2>Seu cadastro foi enviado com sucesso!</h2>
-                <p>Recebemos suas informações e o termo de aceite assinado.</p>
+                <p>Recebemos suas informações e o termo de aceite assinado. Obrigado!</p>
                 
                 <?php if (!empty($pdfFile)): ?>
                 
@@ -268,9 +268,9 @@ $pdfFile = basename($pdfFile); // Segurança
                 <div class="success-info">
                     <p><strong>Próximos passos:</strong></p>
                     <ul>
-                        <li>Você receberá um email de confirmação em breve</li>
-                        <li>Nossa equipe analisará seu cadastro</li>
-                        <li>Entraremos em contato caso necessário</li>
+                        <li>Seu cadastro foi registrado em nosso sistema</li>
+                        <li>Nossa equipe analisará as informações enviadas</li>
+                        <li>Guarde o PDF assinado para seus registros</li>
                     </ul>
                 </div>
             </div>

@@ -39,15 +39,6 @@ GOOGLE_DRIVE_FOLDER_ID=seu_drive_folder_id_real
 RECAPTCHA_SITE_KEY=sua_site_key_real
 RECAPTCHA_SECRET_KEY=sua_secret_key_real
 
-# Email (SMTP)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=seu-email@ipsis.com.br
-SMTP_PASS=sua_senha_de_app
-SMTP_FROM=noreply@ipsis.com.br
-SMTP_FROM_NAME=Ipsis - Cadastro de Fornecedores
-ADMIN_EMAIL=admin@ipsis.com.br
-
 # Aplicação
 APP_ENV=production
 APP_DEBUG=false
@@ -181,15 +172,7 @@ sudo apt install certbot python3-certbot-nginx
 sudo certbot --nginx -d seu-dominio.com.br -d www.seu-dominio.com.br
 ```
 
-### 7. Configurar Email (Gmail)
-
-1. Acesse: https://myaccount.google.com/security
-2. Ative "Verificação em duas etapas"
-3. Vá em "Senhas de app"
-4. Crie uma senha para "Email" > "Outro" > "Ipsis Fornecedores"
-5. Use essa senha no `.env` (campo `SMTP_PASS`)
-
-### 8. Testar em Produção
+### 7. Testar em Produção
 
 1. Acesse: https://seu-dominio.com.br
 2. Preencha o formulário de teste
@@ -275,7 +258,6 @@ sudo tail -f /var/log/nginx/fornecedores-error.log
 - [ ] SSL/HTTPS funcionando
 - [ ] Google Sheets testado
 - [ ] Google Drive testado
-- [ ] Email SMTP testado
 - [ ] Formulário testado end-to-end
 - [ ] Página de sucesso funcionando
 - [ ] Download de PDF funcionando

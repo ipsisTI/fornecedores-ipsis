@@ -10,7 +10,6 @@ try {
     require_once __DIR__ . '/../vendor/autoload.php';
     require_once __DIR__ . '/../src/config/config.php';
     require_once __DIR__ . '/../src/services/GoogleDriveService.php';
-    require_once __DIR__ . '/../src/services/EmailService.php';
     
     $razaoSocial = trim($_POST['razao_social'] ?? '');
     $cnpj = trim($_POST['cnpj'] ?? '');
@@ -208,27 +207,6 @@ try {
         $service->spreadsheets_values->append(GOOGLE_SHEET_ID, 'A:G', $body, $params);
     } catch (Exception $e) {
         error_log('Erro Sheets: ' . $e->getMessage());
-    }
-    
-    // ===== ENVIAR EMAILS =====
-    try {
-        $emailService = new \Ipsis\services\EmailService();
-        
-        $dadosEmail = [
-            'razao_social' => $razaoSocial,
-            'cnpj' => $cnpj,
-            'telefone' => $telefone,
-            'email' => $email,
-            'tipo_servico' => $tipoServico
-        ];
-        
-        // Email para o fornecedor
-        $emailService->enviarConfirmacaoFornecedor($dadosEmail);
-        
-        // Email para o admin
-        $emailService->enviarNotificacaoAdmin($dadosEmail);
-    } catch (Exception $e) {
-        error_log('Erro ao enviar emails: ' . $e->getMessage());
     }
     
     ob_end_clean();

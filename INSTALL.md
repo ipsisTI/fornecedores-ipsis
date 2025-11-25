@@ -142,15 +142,6 @@ GOOGLE_CREDENTIALS_PATH=src/config/credentials.json
 RECAPTCHA_SITE_KEY=sua_site_key_aqui
 RECAPTCHA_SECRET_KEY=sua_secret_key_aqui
 
-# Email (Gmail como exemplo)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=seu-email@ipsis.com.br
-SMTP_PASS=sua_senha_de_app
-SMTP_FROM=noreply@ipsis.com.br
-SMTP_FROM_NAME=Ipsis - Cadastro de Fornecedores
-ADMIN_EMAIL=admin@ipsis.com.br
-
 # Aplicação
 APP_ENV=production
 APP_DEBUG=false
@@ -163,16 +154,6 @@ ALLOWED_FILE_TYPES=pdf,jpg,jpeg,png,doc,docx
 # Segurança
 SESSION_LIFETIME=120
 ```
-
-### Configurar Senha de App do Gmail
-
-1. Acesse: https://myaccount.google.com/security
-2. Ative "Verificação em duas etapas"
-3. Vá em "Senhas de app"
-4. Selecione "Email" e "Outro"
-5. Digite "Ipsis Fornecedores"
-6. Copie a senha gerada
-7. Use no campo `SMTP_PASS` do .env
 
 ## Passo 7: Configurar Permissões
 
@@ -345,19 +326,6 @@ sudo nano /etc/php/8.1/fpm/php.ini
 
 # Reiniciar PHP-FPM
 sudo systemctl restart php8.1-fpm
-```
-
-### Emails não estão sendo enviados
-
-```bash
-# Testar conexão SMTP
-telnet smtp.gmail.com 587
-
-# Verificar logs
-tail -f /var/www/fornecedores-ipsis/logs/error_*.log
-
-# Confirmar senha de app do Gmail
-# Use senha de app, não a senha normal da conta
 ```
 
 ## Manutenção

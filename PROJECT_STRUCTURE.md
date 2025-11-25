@@ -23,8 +23,7 @@ fornecedores-ipsis/
 │   │
 │   ├── 📁 services/                    # Camada de serviços
 │   │   ├── 📄 ValidationService.php   # Validação de dados
-│   │   ├── 📄 GoogleSheetsService.php # Integração Google Sheets
-│   │   └── 📄 EmailService.php        # Envio de emails
+│   │   └── 📄 GoogleSheetsService.php # Integração Google Sheets
 │   │
 │   ├── 📁 handlers/                    # Controladores
 │   │   └── 📄 FormHandler.php         # Processamento do formulário
@@ -79,7 +78,7 @@ fornecedores-ipsis/
 
 **Estrutura:**
 - `config/`: Configurações e credenciais
-- `services/`: Lógica de negócio (validação, email, sheets)
+- `services/`: Lógica de negócio (validação, sheets)
 - `handlers/`: Controladores de requisições
 - `utils/`: Funções auxiliares reutilizáveis
 
@@ -102,7 +101,6 @@ fornecedores-ipsis/
 
 **Bibliotecas:**
 - google/apiclient: Google Sheets API
-- phpmailer/phpmailer: Envio de emails
 - vlucas/phpdotenv: Gerenciamento de .env
 
 ### 📁 logs/
@@ -119,7 +117,6 @@ fornecedores-ipsis/
 
 **Conteúdo:**
 - IDs e chaves do Google (Sheets, reCAPTCHA)
-- Credenciais SMTP
 - Configurações da aplicação
 
 **⚠️ IMPORTANTE:** Nunca versionar este arquivo!
@@ -169,8 +166,8 @@ Usuário → Nginx → public/index.php
             ┌─────────┴─────────┐
             ↓                   ↓
     ValidationService    GoogleSheetsService
-            ↓                   ↓
-      EmailService         Planilha Google
+                                ↓
+                         Planilha Google
 ```
 
 ### Upload de Arquivo

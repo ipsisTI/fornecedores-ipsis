@@ -24,8 +24,6 @@ nano .env
 Preencher:
 - GOOGLE_SHEET_ID
 - RECAPTCHA_SITE_KEY e RECAPTCHA_SECRET_KEY
-- Credenciais SMTP
-- ADMIN_EMAIL
 
 ### 4. Upload credentials.json
 Colocar em: `src/config/credentials.json`
@@ -88,7 +86,7 @@ https://seu-dominio.com
 6. Enviar
 
 ### Confirmação
-Email de confirmação será enviado automaticamente
+Confirmação será exibida na tela após o envio
 
 ## Troubleshooting Rápido
 
@@ -107,9 +105,7 @@ sudo chmod -R 775 /var/www/fornecedores-ipsis/uploads
 sudo chown -R www-data:www-data /var/www/fornecedores-ipsis/uploads
 ```
 
-### Email não envia
-- Usar senha de app do Gmail (não senha normal)
-- Verificar porta 587 aberta
+
 
 ## Links Úteis
 

@@ -222,22 +222,6 @@ cat /var/www/fornecedores-ipsis/src/config/credentials.json | grep client_email
 php /var/www/fornecedores-ipsis/tests/test-connection.php
 ```
 
-### Email Não Envia
-
-**Causa:** Credenciais SMTP incorretas
-
-**Solução:**
-```bash
-# Verificar configurações
-cat /var/www/fornecedores-ipsis/.env | grep SMTP
-
-# Testar conexão SMTP
-telnet smtp.gmail.com 587
-
-# Usar senha de app (não senha normal)
-# Gerar em: https://myaccount.google.com/apppasswords
-```
-
 ### CNPJ Duplicado Não Detecta
 
 **Causa:** Erro na leitura da planilha

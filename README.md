@@ -10,7 +10,6 @@ Sistema web para cadastro e qualificação de fornecedores com assinatura digita
 - Upload de documentos
 - Proteção contra spam (reCAPTCHA v3)
 - Integração com Google Sheets API
-- Email de confirmação automático
 - Design responsivo baseado no site ipsis.com.br
 
 ## 🚀 Tecnologias
@@ -19,7 +18,6 @@ Sistema web para cadastro e qualificação de fornecedores com assinatura digita
 - HTML5/CSS3/JavaScript
 - Google Sheets API v4
 - Google reCAPTCHA v3
-- PHPMailer para envio de emails
 - Nginx (servidor web)
 
 ## 📁 Estrutura do Projeto
@@ -40,7 +38,6 @@ fornecedores-ipsis/
 │   │   └── config.php         # Configurações gerais
 │   ├── services/
 │   │   ├── GoogleSheetsService.php
-│   │   ├── EmailService.php
 │   │   └── ValidationService.php
 │   ├── handlers/
 │   │   └── FormHandler.php    # Processamento do formulário
@@ -163,19 +160,6 @@ A planilha deve ter as seguintes colunas (Linha 1):
 |---|---|---|---|---|---|---|---|---|---|---|
 | Data/Hora | Razão Social | Nome Fantasia | CNPJ | Endereço | Telefone | Email | Tipo de Serviço | Documento | Assinatura | Status |
 
-## 📧 Configuração de Email
-
-Configure as credenciais SMTP no arquivo `.env`:
-
-```
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=seu-email@ipsis.com.br
-SMTP_PASS=sua-senha-app
-SMTP_FROM=noreply@ipsis.com.br
-SMTP_FROM_NAME=Ipsis - Cadastro de Fornecedores
-```
-
 ## 🔒 Segurança
 
 - Validação de CNPJ no backend
@@ -203,7 +187,7 @@ O design segue o padrão visual do site ipsis.com.br:
 4. Assine digitalmente (desenhe ou digite)
 5. Complete o reCAPTCHA
 6. Envie o formulário
-7. Receba confirmação por email
+7. Receba confirmação na tela
 
 ## 🐛 Troubleshooting
 
@@ -215,11 +199,6 @@ O design segue o padrão visual do site ipsis.com.br:
 ### Upload de arquivos não funciona
 - Verifique permissões da pasta uploads/
 - Confirme o limite de upload no php.ini
-
-### Email não está sendo enviado
-- Verifique credenciais SMTP
-- Confirme que a porta 587 está aberta
-- Use senha de aplicativo se usar Gmail
 
 ## 📄 Licença
 

@@ -28,7 +28,6 @@ Este índice ajuda você a encontrar rapidamente a documentação que precisa.
   - Instalar dependências
   - Configurar Google Sheets API
   - Configurar reCAPTCHA
-  - Configurar email
   - Configurar Nginx
   - Testes
 
@@ -160,7 +159,6 @@ Este índice ajuda você a encontrar rapidamente a documentação que precisa.
 1. [CREDENTIALS_GUIDE.md](CREDENTIALS_GUIDE.md) - Guia completo
    - Google Sheets API
    - reCAPTCHA
-   - Gmail SMTP
 
 ### Manter o Sistema
 1. [MAINTENANCE.md](MAINTENANCE.md) - Guia de manutenção

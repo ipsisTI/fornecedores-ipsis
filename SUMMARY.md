@@ -29,12 +29,7 @@ Sistema web completo para cadastro e qualificação de fornecedores da Ipsis, co
    - Cabeçalho formatado automaticamente
    - Acesso em tempo real aos dados
 
-5. **Notificações por Email**
-   - Confirmação para o fornecedor
-   - Notificação para o administrador
-   - Templates HTML profissionais
-
-6. **Segurança**
+5. **Segurança**
    - Google reCAPTCHA v3
    - CSRF Protection
    - HTTPS obrigatório
@@ -167,7 +162,7 @@ fornecedores-ipsis/
 ### Para os Fornecedores
 ✅ Cadastro online 24/7
 ✅ Interface intuitiva
-✅ Confirmação por email
+✅ Confirmação imediata na tela
 ✅ Processo rápido (< 5 minutos)
 ✅ Assinatura digital simples
 
@@ -181,7 +176,6 @@ fornecedores-ipsis/
 ### APIs
 - **Google Sheets API:** Grátis
 - **Google reCAPTCHA:** Grátis
-- **Gmail SMTP:** Grátis (até 500 emails/dia)
 
 ### Total Estimado
 - **Setup:** $0 (uma vez)
@@ -211,7 +205,6 @@ fornecedores-ipsis/
 ✅ Frontend responsivo
 ✅ Backend com validações
 ✅ Integração Google Sheets
-✅ Sistema de emails
 ✅ Segurança implementada
 ✅ Documentação completa
 ✅ Scripts de teste
@@ -221,7 +214,6 @@ fornecedores-ipsis/
 ⏳ Criar projeto no Google Cloud
 ⏳ Configurar Google Sheets API
 ⏳ Configurar reCAPTCHA
-⏳ Configurar SMTP
 ⏳ Baixar logo da Ipsis
 ⏳ Deploy no servidor AWS
 ⏳ Testes em produção
@@ -238,11 +230,7 @@ fornecedores-ipsis/
    - Registrar site
    - Copiar chaves
 
-3. **Configurar Email**
-   - Gerar senha de app Gmail
-   - Configurar SMTP
-
-4. **Deploy**
+3. **Deploy**
    - Upload para servidor
    - Configurar .env
    - Instalar dependências
@@ -267,7 +255,6 @@ fornecedores-ipsis/
 ### Monitoramento
 - Google Sheets (dados em tempo real)
 - Logs de erro (diário)
-- Emails recebidos (confirmações)
 
 ## 🏆 Diferenciais
 

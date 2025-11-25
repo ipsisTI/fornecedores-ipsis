@@ -25,15 +25,6 @@ define('GOOGLE_DRIVE_FOLDER_ID', $_ENV['GOOGLE_DRIVE_FOLDER_ID'] ?? '');
 define('RECAPTCHA_SITE_KEY', $_ENV['RECAPTCHA_SITE_KEY']);
 define('RECAPTCHA_SECRET_KEY', $_ENV['RECAPTCHA_SECRET_KEY']);
 
-// Configurações de Email
-define('SMTP_HOST', $_ENV['SMTP_HOST']);
-define('SMTP_PORT', $_ENV['SMTP_PORT']);
-define('SMTP_USER', $_ENV['SMTP_USER']);
-define('SMTP_PASS', $_ENV['SMTP_PASS']);
-define('SMTP_FROM', $_ENV['SMTP_FROM']);
-define('SMTP_FROM_NAME', $_ENV['SMTP_FROM_NAME']);
-define('ADMIN_EMAIL', $_ENV['ADMIN_EMAIL']);
-
 // Configurações da Aplicação
 define('APP_ENV', $_ENV['APP_ENV'] ?? 'production');
 define('APP_DEBUG', filter_var($_ENV['APP_DEBUG'] ?? false, FILTER_VALIDATE_BOOLEAN));
