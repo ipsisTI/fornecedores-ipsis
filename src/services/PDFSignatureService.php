@@ -10,11 +10,13 @@ use setasign\Fpdi\Fpdi;
 class PDFSignatureService
 {
     private $originalPdfPath;
+    private $guiaVisitantePath;
     private $outputDir;
 
     public function __construct()
     {
         $this->originalPdfPath = __DIR__ . '/../../doc/Código de Relacionamento para Fornecedores de Bens e Serviços_2025.pdf';
+        $this->guiaVisitantePath = __DIR__ . '/../../doc/GuiaVisitante.pdf';
         $this->outputDir = __DIR__ . '/../../uploads/signed/';
         
         // Criar diretório se não existir
@@ -42,24 +44,34 @@ class PDFSignatureService
             // Criar instância do FPDI
             $pdf = new Fpdi();
             
-            // Obter número de páginas do PDF original
+            // ---- 1) Documento principal: Código de Relacionamento ----
             $pageCount = $pdf->setSourceFile($this->originalPdfPath);
             
-            // Importar todas as páginas
+            // Importar todas as páginas do documento principal
             for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
-                // Importar página
                 $templateId = $pdf->importPage($pageNo);
                 $size = $pdf->getTemplateSize($templateId);
                 
                 // Adicionar página com mesma orientação e tamanho
                 $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
-                
-                // Usar o template
                 $pdf->useTemplate($templateId);
                 
-                // Se for a última página, adicionar assinatura
+                // A assinatura é adicionada na última página do Código de Relacionamento
                 if ($pageNo === $pageCount) {
                     $this->adicionarAssinaturaUltimaPagina($pdf, $assinatura, $tipoAssinatura, $dadosFornecedor, $size);
+                }
+            }
+            
+            // ---- 2) Anexar o Guia do Visitante como as últimas páginas ----
+            if (file_exists($this->guiaVisitantePath)) {
+                $guiaPageCount = $pdf->setSourceFile($this->guiaVisitantePath);
+                
+                for ($pageNo = 1; $pageNo <= $guiaPageCount; $pageNo++) {
+                    $templateId = $pdf->importPage($pageNo);
+                    $size = $pdf->getTemplateSize($templateId);
+                    
+                    $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
+                    $pdf->useTemplate($templateId);
                 }
             }
             

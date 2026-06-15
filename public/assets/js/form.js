@@ -431,6 +431,7 @@ function showMessage(message, type) {
  * ===================================
  */
 let pdfDoc = null;
+let pdfDocs = [];
 let hasScrolledToBottom = false;
 let currentZoom = 1.0;
 
@@ -438,8 +439,12 @@ let currentZoom = 1.0;
 if (typeof pdfjsLib !== 'undefined') {
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     
-    // Elementos
-    const pdfUrl = 'doc/Código de Relacionamento para Fornecedores de Bens e Serviços_2025.pdf';
+    // Documentos exibidos no visualizador (renderizados em sequência).
+    // O Guia do Visitante é exibido como as últimas páginas do documento.
+    const pdfUrls = [
+        'doc/Código de Relacionamento para Fornecedores de Bens e Serviços_2025.pdf',
+        'doc/GuiaVisitante.pdf'
+    ];
     const loadingDiv = document.getElementById('pdfLoading');
     const pdfHeader = document.getElementById('pdfHeader');
     const scrollContainer = document.getElementById('pdfScrollContainer');
@@ -452,10 +457,10 @@ if (typeof pdfjsLib !== 'undefined') {
     const baseScale = isMobile ? 2.0 : 1.0; // Escala maior no mobile para melhor resolução
     
     /**
-     * Renderizar uma página específica
+     * Renderizar uma página específica de um documento
      */
-    function renderPage(pageNumber, scale) {
-        return pdfDoc.getPage(pageNumber).then(function(page) {
+    function renderPage(doc, pageNumber, scale) {
+        return doc.getPage(pageNumber).then(function(page) {
             // Calcular escala baseada na largura FIXA do container
             const containerWidth = scrollContainer.clientWidth - 40; // menos padding e scrollbar
             const viewport = page.getViewport({scale: 1});
@@ -470,7 +475,6 @@ if (typeof pdfjsLib !== 'undefined') {
             canvas.height = scaledViewport.height;
             canvas.width = scaledViewport.width;
             canvas.className = 'pdf-page';
-            canvas.dataset.page = pageNumber;
             
             pagesContainer.appendChild(canvas);
             
@@ -484,13 +488,14 @@ if (typeof pdfjsLib !== 'undefined') {
     }
     
     /**
-     * Renderizar todas as páginas
+     * Renderizar todas as páginas de todos os documentos (em sequência)
      */
     async function renderAllPages(scale) {
-        const numPages = pdfDoc.numPages;
-        
-        for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-            await renderPage(pageNum, scale);
+        for (const doc of pdfDocs) {
+            const numPages = doc.numPages;
+            for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+                await renderPage(doc, pageNum, scale);
+            }
         }
         
         console.log('Todas as páginas renderizadas com escala:', scale);
@@ -604,11 +609,19 @@ if (typeof pdfjsLib !== 'undefined') {
     });
     
     /**
-     * Carregar e renderizar PDF
+     * Carregar e renderizar os PDFs (em sequência)
      */
-    pdfjsLib.getDocument(pdfUrl).promise.then(function(pdfDoc_) {
-        pdfDoc = pdfDoc_;
-        document.getElementById('pageCount').textContent = pdfDoc.numPages;
+    Promise.all(pdfUrls.map(function(url) {
+        return pdfjsLib.getDocument(url).promise;
+    })).then(function(docs) {
+        pdfDocs = docs;
+        pdfDoc = docs[0]; // mantido para compatibilidade
+
+        // Total de páginas somando todos os documentos
+        const totalPages = docs.reduce(function(sum, doc) {
+            return sum + doc.numPages;
+        }, 0);
+        document.getElementById('pageCount').textContent = totalPages;
         
         // Esconder loading e mostrar PDF
         loadingDiv.style.display = 'none';
@@ -630,6 +643,6 @@ if (typeof pdfjsLib !== 'undefined') {
         
     }).catch(function(error) {
         console.error('Erro ao carregar PDF:', error);
-        loadingDiv.innerHTML = 'Erro ao carregar o documento. <a href="' + pdfUrl + '" target="_blank">Clique aqui para abrir em nova aba</a>';
+        loadingDiv.innerHTML = 'Erro ao carregar o documento. <a href="' + pdfUrls[0] + '" target="_blank">Clique aqui para abrir em nova aba</a>';
     });
 }
