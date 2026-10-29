@@ -162,14 +162,29 @@ A planilha deve ter as seguintes colunas (Linha 1):
 
 ## 🔒 Segurança
 
-- Validação de CNPJ no backend
+- CSRF token validado no servidor (hash_equals)
+- reCAPTCHA v3 verificado no servidor (score mínimo 0,5)
+- Validação de CNPJ (dígitos verificadores) no backend
+- Rate limiting por sessão (30s)
+- Download do PDF autorizado somente para a sessão que o gerou
+- Arquivos no Google Drive restritos à pasta (sem permissão pública de link)
+- Sanitização anti-injeção de fórmulas nos valores gravados no Google Sheets (campos iniciados por `=`, `+`, `-`, `@`, tab ou CR são prefixados com aspa simples para virar texto puro)
 - Sanitização de inputs
-- Proteção contra SQL Injection (não usa SQL diretamente)
-- Proteção contra XSS
-- reCAPTCHA v3 para prevenir bots
-- Validação de tipos de arquivo no upload
-- Limite de tamanho de arquivo (5MB)
-- HTTPS obrigatório em produção
+- HTTPS em produção
+
+## 🛠️ Revogar acesso público de PDFs antigos no Drive
+
+`tools/revogar-acesso-publico.php` varre a pasta configurada em `GOOGLE_DRIVE_FOLDER_ID`, lista os arquivos que ainda têm permissão pública (`anyone`) e pode revogá-la — útil para PDFs publicados antes do hardening de permissões.
+
+```bash
+# Dry-run (padrão): apenas lista arquivo, nome e ID da permissão anyone
+php tools/revogar-acesso-publico.php
+
+# Revoga de fato cada permissão anyone encontrada
+php tools/revogar-acesso-publico.php --apply
+```
+
+O script só roda via CLI (bloqueado no web), usa exclusivamente as credenciais do `.env` e suporta Shared Drives.
 
 ## 🎨 Design
 

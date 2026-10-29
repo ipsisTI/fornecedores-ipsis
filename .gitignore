@@ -16,6 +16,9 @@ public/debug*.php
 public/test-post.php
 
 # Logs
+logs/
+# A proteção web precisa sobreviver ao deploy via git
+!/logs/.htaccess
 *.log
 
 # Sistema
@@ -33,3 +36,6 @@ Thumbs.db
 # Backup
 *.backup
 *.bak
+
+# Artefato de FTP do servidor
+.ftpquota

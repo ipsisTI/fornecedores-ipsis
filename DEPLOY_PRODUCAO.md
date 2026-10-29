@@ -209,12 +209,14 @@ tail -f /var/log/php8.0-fpm.log
 
 ## 🔒 Segurança
 
-- ✅ HTTPS obrigatório
-- ✅ Arquivos sensíveis protegidos (`.env`, `credentials.json`)
-- ✅ Validação de entrada no backend
-- ✅ reCAPTCHA v3 ativo
-- ✅ CSRF token
-- ✅ Sanitização de dados
+- ✅ CSRF token validado no servidor (hash_equals)
+- ✅ reCAPTCHA v3 verificado no servidor (score mínimo 0,5)
+- ✅ Validação de CNPJ (dígitos verificadores) no backend
+- ✅ Rate limiting por sessão (30s)
+- ✅ Download do PDF autorizado somente para a sessão que o gerou
+- ✅ Arquivos no Google Drive restritos à pasta (sem permissão pública de link)
+- ✅ Sanitização de inputs
+- ✅ HTTPS em produção
 
 ## 📊 Manutenção
 

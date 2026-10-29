@@ -99,9 +99,8 @@ Depois de configurar, o sistema vai:
 
 1. ✅ Gerar o PDF com assinatura
 2. ✅ Fazer upload do PDF para a pasta do Google Drive
-3. ✅ Criar um link público para o PDF
-4. ✅ Salvar o link na planilha (como hyperlink clicável)
-5. ✅ Permitir que você acesse todos os PDFs organizados no Drive
+3. ✅ Salvar o link na planilha (como hyperlink clicável) — o acesso ao PDF é herdado da pasta, sem link público
+4. ✅ Permitir que você acesse todos os PDFs organizados no Drive
 
 ## Vantagens
 
@@ -114,3 +113,22 @@ Depois de configurar, o sistema vai:
 ---
 
 **Pronto para configurar?** Siga os passos acima e me avise quando terminar!
+
+## Alternativa: pasta comum (Meu Drive) em vez de Shared Drive
+
+Se a empresa não usa Google Workspace (ou você prefere não criar um Drive Compartilhado), é possível usar uma pasta comum no Meu Drive:
+
+1. **Crie a pasta no Meu Drive**: acesse https://drive.google.com/, clique em **"Novo"** > **"Nova pasta"** e dê um nome (ex.: "PDFs Assinados - Fornecedores Ipsis").
+2. **Compartilhe com a service account**: abra `src/config/credentials.json`, copie o valor do campo `client_email` e compartilhe a pasta com esse e-mail usando o papel de **Editor** (desmarque "Notificar pessoas").
+3. **Copie o ID da pasta**: abra a pasta no Drive e copie o trecho da URL após `/folders/`:
+   ```
+   https://drive.google.com/drive/folders/[ESTE_É_O_ID]
+   ```
+   Coloque esse ID em `GOOGLE_DRIVE_FOLDER_ID` do `.env`. O código funciona igual — o parâmetro `supportsAllDrives` usado no upload não interfere em pastas comuns.
+
+**Observações:**
+
+- Os arquivos enviados passam a ter a **service account como proprietária**.
+- O **acesso aos PDFs é herdado da pasta**: para que a equipe do RH veja os documentos, compartilhe a pasta com eles.
+- A **cota de armazenamento** passa a ser da conta proprietária da pasta.
+- Para retenção institucional (arquivos que não pertencem a uma única pessoa), o **Shared Drive continua sendo o recomendado**.
