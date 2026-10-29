@@ -16,7 +16,7 @@ public/debug*.php
 public/test-post.php
 
 # Logs
-logs/
+logs/*
 # A proteção web precisa sobreviver ao deploy via git
 !/logs/.htaccess
 *.log
