@@ -62,11 +62,12 @@ uploads/
     └── assinatura_[ID]_[TIMESTAMP].png
 
 doc/
-└── Código de Relacionamento para Fornecedores de Bens e Serviços_2025.pdf
+└── CodigoFornecedor.pdf             # Código de Relacionamento para Fornecedores (nome genérico: trocar o termo não exige mudança de código)
 
 public/
 ├── doc/                             # Cópia do PDF para visualização
-│   └── Código de Relacionamento para Fornecedores de Bens e Serviços_2025.pdf
+│   ├── CodigoFornecedor.pdf
+│   └── GuiaVisitante.pdf
 └── download-pdf.php                 # Endpoint para download seguro
 
 src/

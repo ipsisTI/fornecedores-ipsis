@@ -105,7 +105,7 @@ try {
     $isBase64Image = (strpos($assinatura, 'data:image') === 0);
 
     $pdf = new \setasign\Fpdi\Fpdi();
-    $pdfPath = __DIR__ . '/doc/Código de Relacionamento para Fornecedores de Bens e Serviços_2025.pdf';
+    $pdfPath = __DIR__ . '/doc/CodigoFornecedor.pdf';
 
     if (!file_exists($pdfPath)) {
         // Caminho completo só no log do servidor; nunca na resposta ao cliente

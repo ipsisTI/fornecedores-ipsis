@@ -442,7 +442,7 @@ if (typeof pdfjsLib !== 'undefined') {
     // Documentos exibidos no visualizador (renderizados em sequência).
     // O Guia do Visitante é exibido como as últimas páginas do documento.
     const pdfUrls = [
-        'doc/Código de Relacionamento para Fornecedores de Bens e Serviços_2025.pdf',
+        'doc/CodigoFornecedor.pdf',
         'doc/GuiaVisitante.pdf'
     ];
     const loadingDiv = document.getElementById('pdfLoading');

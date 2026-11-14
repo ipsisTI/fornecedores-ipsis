@@ -15,7 +15,7 @@ class PDFSignatureService
 
     public function __construct()
     {
-        $this->originalPdfPath = __DIR__ . '/../../doc/Código de Relacionamento para Fornecedores de Bens e Serviços_2025.pdf';
+        $this->originalPdfPath = __DIR__ . '/../../doc/CodigoFornecedor.pdf';
         $this->guiaVisitantePath = __DIR__ . '/../../doc/GuiaVisitante.pdf';
         $this->outputDir = __DIR__ . '/../../uploads/signed/';
         

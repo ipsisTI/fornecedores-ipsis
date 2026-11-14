@@ -63,7 +63,7 @@ fornecedores-ipsis/
 ├── uploads/
 │   └── signed/         # Criar com permissão 775
 ├── doc/
-│   └── Código de Relacionamento...pdf
+│   └── CodigoFornecedor.pdf
 ├── .env                # Configurado com dados reais
 └── composer.json
 ```
