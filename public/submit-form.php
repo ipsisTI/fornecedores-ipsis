@@ -36,6 +36,7 @@ try {
     // Coleta e sanitização dos campos de texto
     $razaoSocial = trim(strip_tags($_POST['razao_social'] ?? ''));
     $cnpj = trim(strip_tags($_POST['cnpj'] ?? ''));
+    $tipoDocumento = trim(strip_tags($_POST['tipo_documento'] ?? 'cnpj'));
     $telefone = trim(strip_tags($_POST['telefone'] ?? ''));
     $email = trim(strip_tags($_POST['email'] ?? ''));
     $tipoServico = trim(strip_tags($_POST['tipo_servico'] ?? ''));
@@ -75,10 +76,28 @@ try {
         throw new Exception('Razão social deve ter no máximo 150 caracteres.');
     }
 
-    if (!isValidCNPJ($cnpj)) {
+    // Documento: CNPJ (nacional, com dígitos verificadores) ou VAT Number
+    // (internacional, formato país + alfanumérico). Mesmo campo no formulário.
+    if (!in_array($tipoDocumento, ['cnpj', 'vat'], true)) {
+        $statusCode = 422;
+        throw new Exception('Tipo de documento invalido.');
+    }
+    if (strlen($cnpj) > 20) {
+        $statusCode = 422;
+        throw new Exception('Documento deve ter no máximo 20 caracteres.');
+    }
+    if ($tipoDocumento === 'vat') {
+        if (!isValidVATNumber($cnpj)) {
+            $statusCode = 422;
+            throw new Exception('VAT Number invalido. Use o codigo do pais seguido do numero (ex.: DE123456789).');
+        }
+    } elseif (!isValidCNPJ($cnpj)) {
         $statusCode = 422;
         throw new Exception('CNPJ inválido. Verifique os números informados.');
     }
+
+    // Rótulo do documento no PDF assinado e na identificação da assinatura
+    $documentoLabel = ($tipoDocumento === 'vat') ? 'VAT Number' : 'CNPJ';
 
     if (!isValidPhone($telefone)) {
         $statusCode = 422;
@@ -148,7 +167,7 @@ try {
     $pdf->Cell(0, 8, utf8_decode($razaoSocial), 0, 1);
 
     $pdf->SetFont('Arial', '', 11);
-    $pdf->Cell(50, 8, 'CNPJ:', 0, 0);
+    $pdf->Cell(50, 8, $documentoLabel . ':', 0, 0);
     $pdf->SetFont('Arial', 'B', 11);
     $pdf->Cell(0, 8, $cnpj, 0, 1);
 
@@ -232,7 +251,7 @@ try {
     $pdf->SetXY(55, $yLinha + 2);
     $pdf->Cell(100, 5, utf8_decode($razaoSocial), 0, 1, 'C');
     $pdf->SetX(55);
-    $pdf->Cell(100, 5, 'CNPJ: ' . $cnpj, 0, 1, 'C');
+    $pdf->Cell(100, 5, $documentoLabel . ': ' . $cnpj, 0, 1, 'C');
     $pdf->SetX(55);
     $pdf->Cell(100, 5, 'Data: ' . date('d/m/Y H:i:s'), 0, 1, 'C');
 
@@ -241,9 +260,10 @@ try {
         mkdir($outputDir, 0755, true);
     }
 
-    $cnpjLimpo = preg_replace('/[^0-9]/', '', $cnpj);
+    // Alfanumérico: CNPJ vira só dígitos, VAT preserva letras (código do país)
+    $documentoLimpo = preg_replace('/[^A-Za-z0-9]/', '', $cnpj);
     $timestamp = date('YmdHis');
-    $filename = "codigo_relacionamento_assinado_{$cnpjLimpo}_{$timestamp}.pdf";
+    $filename = "codigo_relacionamento_assinado_{$documentoLimpo}_{$timestamp}.pdf";
 
     $pdf->Output('F', $outputDir . $filename);
 

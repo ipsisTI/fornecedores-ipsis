@@ -64,6 +64,16 @@ function formatCNPJ($cnpj) {
 }
 
 /**
+ * Valida VAT Number de fornecedor internacional: 2 letras de país seguidas
+ * de 2 a 13 caracteres alfanuméricos (ex.: DE123456789). Não há checksum
+ * universal entre países — valida-se apenas o formato.
+ */
+function isValidVATNumber($vat) {
+    $vat = strtoupper(preg_replace('/[\s.\/-]/', '', (string)$vat));
+    return (bool)preg_match('/^[A-Z]{2}[A-Z0-9]{2,13}$/', $vat);
+}
+
+/**
  * Valida formato de email
  */
 function isValidEmail($email) {

@@ -1021,3 +1021,27 @@ body {
         height: auto !important;
     }
 }
+
+/* Toggle CNPJ / VAT Number */
+.documento-toggle {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    margin-bottom: 10px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: normal;
+    cursor: pointer;
+    color: #555;
+}
+
+.radio-option input[type="radio"] {
+    accent-color: #0066cc;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}

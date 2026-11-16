@@ -51,15 +51,48 @@ function initializeCanvas() {
  * Inicializa máscaras de input
  */
 function initializeMasks() {
-    // Máscara CNPJ
+    // Documento da empresa: CNPJ (nacional) ou VAT Number (internacional)
     const cnpjInput = document.getElementById('cnpj');
+    const documentoLabel = document.getElementById('documento-label');
+    const tipoDocumentoRadios = document.querySelectorAll('input[name="tipo_documento"]');
+
+    function documentoTipoAtual() {
+        const radio = document.querySelector('input[name="tipo_documento"]:checked');
+        return radio ? radio.value : 'cnpj';
+    }
+
+    function aplicarMascaraDocumento(value) {
+        if (documentoTipoAtual() === 'vat') {
+            return value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 15);
+        }
+        let v = value.replace(/\D/g, '').slice(0, 14);
+        v = v.replace(/^(\d{2})(\d)/, '$1.$2');
+        v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+        v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
+        v = v.replace(/(\d{4})(\d)/, '$1-$2');
+        return v;
+    }
+
     cnpjInput.addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '');
-        value = value.replace(/^(\d{2})(\d)/, '$1.$2');
-        value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
-        value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
-        value = value.replace(/(\d{4})(\d)/, '$1-$2');
-        e.target.value = value;
+        e.target.value = aplicarMascaraDocumento(e.target.value);
+    });
+
+    tipoDocumentoRadios.forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            // Trocar o tipo invalida o valor digitado no outro formato
+            cnpjInput.value = '';
+            const errorSpan = document.getElementById('error-cnpj');
+            if (errorSpan) {
+                errorSpan.textContent = '';
+            }
+            if (documentoTipoAtual() === 'vat') {
+                documentoLabel.textContent = 'VAT Number';
+                cnpjInput.placeholder = 'Ex.: DE123456789';
+            } else {
+                documentoLabel.textContent = 'CNPJ';
+                cnpjInput.placeholder = '00.000.000/0000-00';
+            }
+        });
     });
     
     // Máscara Telefone

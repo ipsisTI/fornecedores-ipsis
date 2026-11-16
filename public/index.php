@@ -42,7 +42,17 @@ $csrfToken = generateCSRFToken();
                     </div>
 
                     <div class="form-group">
-                        <label for="cnpj" class="required">CNPJ</label>
+                        <div class="documento-toggle" role="group" aria-label="Tipo de documento da empresa">
+                            <label class="radio-option">
+                                <input type="radio" name="tipo_documento" value="cnpj" checked>
+                                CNPJ (Brasil)
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="tipo_documento" value="vat">
+                                VAT Number (internacional)
+                            </label>
+                        </div>
+                        <label for="cnpj" class="required" id="documento-label">CNPJ</label>
                         <input type="text" id="cnpj" name="cnpj" placeholder="00.000.000/0000-00" required>
                         <span class="error-message" id="error-cnpj"></span>
                     </div>
