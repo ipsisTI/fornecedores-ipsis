@@ -10,7 +10,7 @@ $csrfToken = generateCSRFToken();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro de Fornecedores - Ipsis</title>
-    <link rel="stylesheet" href="assets/css/style.css?v=20261117">
+    <link rel="stylesheet" href="assets/css/style.css?v=20261117b">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://www.google.com/recaptcha/api.js?render=<?php echo RECAPTCHA_SITE_KEY; ?>"></script>
 </head>
@@ -207,6 +207,6 @@ $csrfToken = generateCSRFToken();
     <script>
         const RECAPTCHA_SITE_KEY = '<?php echo RECAPTCHA_SITE_KEY; ?>';
     </script>
-    <script src="assets/js/form.js?v=20261117"></script>
+    <script src="assets/js/form.js?v=20261117b"></script>
 </body>
 </html>
