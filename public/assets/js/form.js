@@ -475,8 +475,10 @@ if (typeof pdfjsLib !== 'undefined') {
     // Documento exibido no visualizador: apenas o Código de Relacionamento.
     // O Guia do Visitante saiu do visualizador (pedido 17/11) — quem quiser
     // pode distribuí-lo por canal próprio; ele nunca fez parte do PDF assinado.
+    // A query de versão estoura o cache do Cloudflare a cada troca de termo
+    // (mesma URL com bytes novos não é revalidada — lição de 17/11).
     const pdfUrls = [
-        'doc/CodigoFornecedor.pdf'
+        'doc/CodigoFornecedor.pdf?v=20261117'
     ];
     const loadingDiv = document.getElementById('pdfLoading');
     const pdfHeader = document.getElementById('pdfHeader');
