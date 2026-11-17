@@ -472,11 +472,11 @@ let currentZoom = 1.0;
 if (typeof pdfjsLib !== 'undefined') {
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     
-    // Documentos exibidos no visualizador (renderizados em sequência).
-    // O Guia do Visitante é exibido como as últimas páginas do documento.
+    // Documento exibido no visualizador: apenas o Código de Relacionamento.
+    // O Guia do Visitante saiu do visualizador (pedido 17/11) — quem quiser
+    // pode distribuí-lo por canal próprio; ele nunca fez parte do PDF assinado.
     const pdfUrls = [
-        'doc/CodigoFornecedor.pdf',
-        'doc/GuiaVisitante.pdf'
+        'doc/CodigoFornecedor.pdf'
     ];
     const loadingDiv = document.getElementById('pdfLoading');
     const pdfHeader = document.getElementById('pdfHeader');
